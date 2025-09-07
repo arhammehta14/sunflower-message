@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tap the Sunflower 🌻</title>
+  <meta name="description" content="Tap the sunflower, type a message, and unlock a cute surprise." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fff8ef;
+      --ink: #1c1b1a;
+      --accent: #ffa62b;
+      --accent-2: #ffd166;
+      --mint: #d7ffd9;
+      --pink: #ffd6e7;
+      --lav: #e8d9ff;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Poppins, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--ink);
+      background: radial-gradient(1200px 800px at 20% 10%, #fff1df, transparent),
+                  radial-gradient(1200px 800px at 80% 90%, #ffe9f3, transparent),
+                  var(--bg);
+      overflow-x: hidden;
+    }
+    .wrap { min-height: 100%; display: grid; place-items: center; padding: 24px; }
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      text-align: center;
+      max-width: 680px;
+      width: 100%;
+    }
+    h1 { margin: 0 0 8px; font-weight: 700; letter-spacing: .3px; }
+    p.lead { margin: 0 0 18px; color: #5b5856; }
+
+    /* Sunflower button */
+    .sun-btn {
+      appearance: none; border: 0; background: transparent; cursor: pointer;
+      display: inline-grid; place-items: center; width: 220px; height: 220px;
+      transition: transform .25s ease, filter .25s ease;
+    }
+    .sun-btn:focus-visible { outline: 3px dashed #222; outline-offset: 6px; }
+    .sun-btn:hover { transform: scale(1.04) rotate(-2deg); filter: drop-shadow(0 12px 18px rgba(0,0,0,.15)); }
+    .breath { animation: breath 2.6s ease-in-out infinite; }
+    @keyframes breath { 0%,100%{ transform: scale(1) } 50%{ transform: scale(1.03) } }
+
+    /* Modal */
+    dialog {
+      border: none; border-radius: 20px; padding: 0; width: min(560px, 92vw);
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal { padding: 22px; background: #fff; border-radius: 20px; }
+    .row { display: grid; gap: 10px; }
+    label { font-weight: 600; font-size: 14px; color: #3f3c39; }
+    input[type="text"], textarea {
+      width: 100%; font: inherit; padding: 12px 14px; border-radius: 12px; border: 1px solid #e6e2de;
+      background: #fffaf6; resize: vertical; min-height: 48px;
+    }
+    .btn {
+      appearance: none; border: 0; cursor: pointer; border-radius: 14px; padding: 12px 16px; font-weight: 700;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      color: #291a00; box-shadow: 0 6px 0 #e8a219; transition: transform .1s ease; letter-spacing: .3px;
+    }
+    .btn:active { transform: translateY(2px); box-shadow: 0 4px 0 #e8a219; }
+    .ghost { background: #f3eee9; box-shadow: none; }
+
+    /* After submit: cute stage */
+    .stage { display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; padding: 14px; }
+    .stage.active { display: flex; }
+    .note {
+      background: #fff; border: 2px dashed #f4c56e; border-radius: 18px; padding: 18px 16px; max-width: 640px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.06);
+    }
+    .tag { display:inline-block; padding: 6px 10px; border-radius: 999px; background: #fff0c7; font-size: 12px; font-weight:700; letter-spacing:.3px; }
+
+    /* Floating hearts */
+    .hearts { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+    .heart { position: absolute; width: 18px; height: 18px; transform: rotate(45deg); opacity: 0; animation: floatUp 4.5s ease-in forwards; }
+    .heart:before, .heart:after { content: ""; position: absolute; width: 18px; height: 18px; background: currentColor; border-radius: 50%; }
+    .heart { background: currentColor; }
+    .heart:before { left: -9px; }
+    .heart:after { top: -9px; }
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translateY(20px) scale(.6) rotate(45deg); }
+      10% { opacity: .95; }
+      100% { opacity: 0; transform: translateY(-110vh) scale(1.3) rotate(45deg); }
+    }
+
+    /* Footer */
+    .share {
+      display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 14px; flex-wrap: wrap;
+    }
+    .linkbox { padding: 10px 12px; background: #fff; border-radius: 12px; border: 1px solid #eee; max-width: 100%; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="card">
+      <h1>Tap the Sunflower 🌻</h1>
+      <p class="lead">Pehle is par click karo. Phir apna message likho. Uske baad ek cute surprise! ✨</p>
+
+      <button id="sunflower" class="sun-btn breath" aria-label="Tap the sunflower">
+        <!-- SVG Sunflower -->
+        <svg width="180" height="180" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="g" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffdd55"/>
+              <stop offset="100%" stop-color="#ffb703"/>
+            </radialGradient>
+          </defs>
+          <!-- petals -->
+          <g transform="translate(128,128)">
+            <!-- 16 petals -->
+            <g id="petals"></g>
+          </g>
+          <!-- center -->
+          <circle cx="128" cy="128" r="46" fill="#4a2c00"/>
+          <circle cx="128" cy="128" r="36" fill="url(#g)" opacity=".25"/>
+        </svg>
+      </button>
+
+      <dialog id="dlg">
+        <form method="dialog" class="modal" id="form">
+          <h2 style="margin:0 0 6px;">Write your message 💬</h2>
+          <p class="lead" style="margin-bottom:14px;">Jo kehna hai yahin likho. Submit karte hi magic hoga. ✨</p>
+          <div class="row">
+            <label for="name">From (naam optional):</label>
+            <input id="name" name="name" type="text" placeholder="e.g., Ravi" />
+          </div>
+          <div class="row">
+            <label for="msg">Message:</label>
+            <textarea id="msg" name="msg" placeholder="Type something cute…" required></textarea>
+          </div>
+          <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+            <button type="button" class="btn ghost" id="cancel">Cancel</button>
+            <button type="submit" class="btn">Submit ✨</button>
+          </div>
+        </form>
+      </dialog>
+
+      <div id="stage" class="stage" aria-live="polite" aria-atomic="true">
+        <div class="tag">New animation unlocked</div>
+        <h2 style="margin:6px 0 0;">Aapka message aa gaya! 💝</h2>
+        <div class="note" id="note"></div>
+        <button class="btn" id="again">Send another</button>
+      </div>
+
+      <div class="share">
+        <div class="linkbox" id="linkbox"></div>
+        <button class="btn ghost" id="copy">Copy Link</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hearts" id="hearts" aria-hidden="true"></div>
+
+  <script>
+    // Build petals dynamically (nice, crisp sunflower)
+    (function buildPetals(){
+      const g = document.getElementById('petals');
+      for(let i=0;i<20;i++){
+        const petal = document.createElementNS('http://www.w3.org/2000/svg','path');
+        const angle = (i/20)*Math.PI*2;
+        const r1=62, r2=108, w=22;
+        // Simple almond petal
+        const d = `M ${Math.cos(angle)*r1} ${Math.sin(angle)*r1}
+                   C ${Math.cos(angle)*r2} ${Math.sin(angle)*r2},
+                     ${Math.cos(angle+0.15)*r2} ${Math.sin(angle+0.15)*r2},
+                     ${Math.cos(angle+0.15)*r1} ${Math.sin(angle+0.15)*r1}
+                   Z`;
+        petal.setAttribute('d', d);
+        petal.setAttribute('fill', i%2? '#ffd166':'#ffca3a');
+        g.appendChild(petal);
+      }
+    })();
+
+    const sunflower = document.getElementById('sunflower');
+    const dlg = document.getElementById('dlg');
+    const form = document.getElementById('form');
+    const cancelBtn = document.getElementById('cancel');
+    const stage = document.getElementById('stage');
+    const note = document.getElementById('note');
+    const again = document.getElementById('again');
+    const hearts = document.getElementById('hearts');
+    const linkbox = document.getElementById('linkbox');
+    const copyBtn = document.getElementById('copy');
+
+    linkbox.textContent = location.href;
+
+    copyBtn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(location.href); copyBtn.textContent='Copied! ✅'; setTimeout(()=>copyBtn.textContent='Copy Link', 1200);} catch(e){ alert('Copy failed'); }
+    });
+
+    sunflower.addEventListener('click', () => {
+      if (typeof dlg.showModal === 'function') {
+        dlg.showModal();
+      } else {
+        alert('Your browser does not support popups. Please update.');
+      }
+    });
+
+    cancelBtn.addEventListener('click', () => dlg.close());
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = form.name.value.trim();
+      const msg = form.msg.value.trim();
+      if(!msg) return;
+      dlg.close();
+
+      // Hide sunflower, show stage
+      sunflower.style.display = 'none';
+      stage.classList.add('active');
+
+      note.innerHTML = `
+        <div style="font-size:14px; color:#6b665f; margin-bottom:6px;">${name ? 'From: <strong>'+esc(name)+'</strong>' : 'From: <em>Someone special</em>'}</div>
+        <div style="font-size:18px; line-height:1.5;">“${esc(msg)}”</div>
+      `;
+
+      // Launch hearts for 3 seconds
+      burstHearts();
+
+      // Optional: add a cute line below after slight delay
+      setTimeout(()=>{
+        const extra = document.createElement('div');
+        extra.style.marginTop = '10px';
+        extra.style.fontWeight = '700';
+        extra.textContent = 'You made someone smile today 😊';
+        note.appendChild(extra);
+      }, 800);
+    });
+
+    again.addEventListener('click', () => {
+      stage.classList.remove('active');
+      sunflower.style.display = 'inline-grid';
+      form.reset();
+    });
+
+    function esc(s){
+      return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+    }
+
+    function burstHearts(){
+      const colors = ['#ff4d6d','#ff99ac','#ff7aa2','#f7bfbf','#ffcad4'];
+      const count = 36;
+      for(let i=0;i<count;i++){
+        const el = document.createElement('div');
+        el.className='heart';
+        el.style.left = Math.random()*100+'vw';
+        el.style.bottom = '-40px';
+        el.style.color = colors[i%colors.length];
+        el.style.animationDelay = (Math.random()*0.8)+'s';
+        el.style.animationDuration = (3.7 + Math.random()*1.2)+'s';
+        el.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,.15))';
+        hearts.appendChild(el);
+        setTimeout(()=>el.remove(), 5200);
+      }
+    }
+  </script>
+</body>
+</html>
